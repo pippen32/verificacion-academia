@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificación de Certificados — Academia del Profe Omar</title>
+<meta name="description" content="Verifica la autenticidad de un certificado de la Academia del Profe Omar con su número de folio único.">
+<style>
+  :root{
+    --navy:#0a1a33;
+    --navy-2:#10264a;
+    --navy-3:#16305c;
+    --gold:#c9a227;
+    --gold-2:#e8c95a;
+    --gold-soft:#f3e3ac;
+    --paper:#f7f3e8;
+    --ink:#1c2434;
+    --ok:#1e7d46;
+    --ok-bg:#e6f4ec;
+    --warn:#9a6a00;
+    --warn-bg:#fdf3d7;
+    --bad:#a4261f;
+    --bad-bg:#fbeae8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--navy);
+    color:var(--paper);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  header{
+    background:linear-gradient(180deg,var(--navy-2),var(--navy));
+    border-bottom:3px solid var(--gold);
+    padding:26px 18px 20px;
+    text-align:center;
+  }
+  .sello{
+    width:84px;height:84px;margin:0 auto 12px;
+    border:3px solid var(--gold);
+    border-radius:50%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 38%,var(--navy-3),var(--navy));
+    color:var(--gold-2);
+    box-shadow:0 0 0 5px rgba(201,162,39,.18), inset 0 0 0 2px rgba(201,162,39,.35);
+  }
+  .sello .pluma{font-size:30px;line-height:1}
+  .sello .siglas{font-size:11px;letter-spacing:3px;margin-top:3px;font-family:Verdana,sans-serif}
+  header h1{
+    font-size:clamp(24px,6.4vw,38px);
+    letter-spacing:2.5px;
+    color:var(--gold-2);
+    text-transform:uppercase;
+    line-height:1.15;
+  }
+  header .sub{
+    margin-top:8px;
+    font-family:Verdana,sans-serif;
+    font-size:clamp(11px,3.2vw,13px);
+    letter-spacing:2.2px;
+    text-transform:uppercase;
+    color:#cdbf92;
+  }
+  main{
+    flex:1;
+    width:100%;
+    max-width:640px;
+    margin:0 auto;
+    padding:26px 16px 40px;
+  }
+  .tarjeta{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:14px;
+    border-top:6px solid var(--gold);
+    box-shadow:0 14px 34px rgba(0,0,0,.45);
+    padding:26px 20px 24px;
+  }
+  .tarjeta h2{
+    font-size:22px;
+    color:var(--navy);
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .tarjeta p.intro{
+    font-family:Verdana,sans-serif;
+    font-size:14px;
+    line-height:1.55;
+    text-align:center;
+    color:#45506a;
+    margin-bottom:20px;
+  }
+  label{
+    display:block;
+    font-family:Verdana,sans-serif;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:1.6px;
+    text-transform:uppercase;
+    color:var(--navy);
+    margin-bottom:8px;
+  }
+  input[type="text"]{
+    width:100%;
+    font-family:'Courier New',monospace;
+    font-size:19px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:15px 14px;
+    border:2px solid #b9c1d4;
+    border-radius:10px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input[type="text"]:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,162,39,.35);
+  }
+  .ayuda{
+    font-family:Verdana,sans-serif;
+    font-size:12px;
+    color:#6a7590;
+    margin-top:8px;
+    line-height:1.5;
+  }
+  button{
+    width:100%;
+    margin-top:18px;
+    padding:16px;
+    font-family:Verdana,sans-serif;
+    font-size:16px;
+    font-weight:bold;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#241a00;
+    background:linear-gradient(180deg,var(--gold-2),var(--gold));
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow:0 5px 0 #8a6d14;
+  }
+  button:active{transform:translateY(3px);box-shadow:0 2px 0 #8a6d14}
+  button:disabled{opacity:.55;cursor:wait;transform:none}
+  #resultado{margin-top:22px;display:none}
+  .res{
+    border-radius:12px;
+    padding:20px 18px;
+    font-family:Verdana,sans-serif;
+    border:2px solid transparent;
+  }
+  .res .icono{font-size:38px;text-align:center;line-height:1}
+  .res .titulo{
+    text-align:center;
+    font-size:19px;
+    font-weight:bold;
+    margin:10px 0 14px;
+    letter-spacing:.4px;
+  }
+  .res dl{display:block}
+  .res .fila{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    padding:9px 2px;
+    border-top:1px dashed rgba(28,36,52,.25);
+    font-size:14.5px;
+  }
+  .res .fila dt{font-weight:bold;color:#5a6580;flex:0 0 38%}
+  .res .fila dd{text-align:right;font-weight:bold;color:var(--ink)}
+  .res .folio{
+    text-align:center;
+    font-family:'Courier New',monospace;
+    font-size:15px;
+    letter-spacing:1.5px;
+    margin-top:14px;
+    color:#5a6580;
+  }
+  .res.valido{background:var(--ok-bg);border-color:var(--ok)}
+  .res.valido .titulo{color:var(--ok)}
+  .res.ejemplo{background:var(--warn-bg);border-color:var(--warn)}
+  .res.ejemplo .titulo{color:var(--warn)}
+  .res.nohallado{background:var(--bad-bg);border-color:var(--bad)}
+  .res.nohallado .titulo{color:var(--bad)}
+  .res p.nota{
+    margin-top:12px;
+    font-size:13px;
+    line-height:1.55;
+    text-align:center;
+    color:#45506a;
+  }
+  .como{
+    margin-top:28px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(201,162,39,.4);
+    border-radius:12px;
+    padding:18px;
+    font-family:Verdana,sans-serif;
+  }
+  .como h3{color:var(--gold-2);font-size:14px;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:10px}
+  .como p{font-size:13.5px;line-height:1.6;color:#e5ddc4}
+  .como code{
+    font-family:'Courier New',monospace;
+    background:rgba(0,0,0,.35);
+    padding:1px 6px;
+    border-radius:5px;
+    color:var(--gold-soft);
+    font-size:13px;
+  }
+  footer{
+    border-top:1px solid rgba(201,162,39,.4);
+    padding:20px 18px 28px;
+    text-align:center;
+    font-family:Verdana,sans-serif;
+    font-size:12.5px;
+    line-height:1.7;
+    color:#b9ac7f;
+  }
+  footer strong{color:var(--gold-2)}
+  footer a{color:var(--gold-2);text-decoration:none;font-weight:bold}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="sello" aria-hidden="true">
+    <div class="pluma">🎓</div>
+    <div class="siglas">APO</div>
+  </div>
+  <h1>Academia del Profe Omar</h1>
+  <div class="sub">Registro oficial de certificados</div>
+</header>
+
+<main>
+  <section class="tarjeta">
+    <h2>Verifica un certificado</h2>
+    <p class="intro">Cada certificado de la Academia lleva un <strong>folio único</strong> impreso. Escríbelo aquí y confirma en segundos que es auténtico: nombre del graduado, programa y fecha de culminación.</p>
+
+    <form id="form-verificar" autocomplete="off">
+      <label for="folio">Número de folio</label>
+      <input type="text" id="folio" name="folio" placeholder="Ej.: ACAD-CAP-0001" maxlength="24" autocapitalize="characters" spellcheck="false" required>
+      <p class="ayuda">El folio aparece en la parte inferior de tu certificado, con el formato ACAD-XXX-0000.</p>
+      <button type="submit" id="btn-verificar">Verificar certificado</button>
+    </form>
+
+    <div id="resultado" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="como">
+    <h3>¿Cómo funciona?</h3>
+    <p>Al completar un programa, cada graduado recibe su certificado con un folio único (ejemplo: <code>ACAD-CAP-0123</code>) y su nombre queda asentado en este registro. Si el folio no aparece aquí, el certificado <strong>no</strong> fue emitido por la Academia del Profe Omar.</p>
+  </section>
+</main>
+
+<footer>
+  <p><strong>Academia del Profe Omar</strong> — Omar Cruz Padilla</p>
+  <p>Escuelas 100% en línea, en español · Certificados privados de culminación</p>
+  <p>¿Dudas sobre un certificado? Escríbenos por WhatsApp: <a href="https://wa.me/12406590154">240-659-0154</a></p>
+</footer>
+
+<script>
+(function(){
+  var form = document.getElementById('form-verificar');
+  var input = document.getElementById('folio');
+  var boton = document.getElementById('btn-verificar');
+  var caja = document.getElementById('resultado');
+  var datos = null;
+
+  function fechaBonita(iso){
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var p = String(iso || '').split('-');
+    if(p.length !== 3) return iso || '';
+    var d = parseInt(p[2],10), m = parseInt(p[1],10), a = p[0];
+    if(!meses[m-1]) return iso;
+    return d + ' de ' + meses[m-1] + ' de ' + a;
+  }
+
+  function pintar(html){
+    caja.innerHTML = html;
+    caja.style.display = 'block';
+  }
+
+  function mostrarNoHallado(folio){
+    pintar(
+      '<div class="res nohallado">' +
+        '<div class="icono">✕</div>' +
+        '<div class="titulo">Folio no encontrado</div>' +
+        '<p class="nota">El folio <strong>' + folio + '</strong> no aparece en el registro de la Academia del Profe Omar. ' +
+        'Revisa que lo escribiste completo, con guiones, tal como aparece en el certificado. ' +
+        'Si el certificado dice ser nuestro y el folio no aparece aquí, escríbenos por WhatsApp al 240-659-0154.</p>' +
+      '</div>'
+    );
+  }
+
+  function mostrarEncontrado(folio, reg){
+    if(reg.ejemplo){
+      pintar(
+        '<div class="res ejemplo">' +
+          '<div class="icono">⚠</div>' +
+          '<div class="titulo">Folio de ejemplo — NO es un certificado válido</div>' +
+          '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Graduado</dt><dd style="text-align:right;font-weight:bold">' + reg.nombre + '</dd></div>' +
+          '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Programa</dt><dd style="text-align:right;font-weight:bold">' + reg.programa + '</dd></div>' +
+          '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Fecha de culminación</dt><dd style="text-align:right;font-weight:bold">' + fechaBonita(reg.fecha) + '</dd></div>' +
+          '<div class="folio">Folio: ' + folio + '</div>' +
+          '<p class="nota">Este folio existe solo como muestra para probar el sistema. Ningún certificado impreso con este folio es válido.</p>' +
+        '</div>'
+      );
+      return;
+    }
+    pintar(
+      '<div class="res valido">' +
+        '<div class="icono">✔</div>' +
+        '<div class="titulo">Certificado válido — Academia del Profe Omar</div>' +
+        '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Graduado</dt><dd style="text-align:right;font-weight:bold">' + reg.nombre + '</dd></div>' +
+        '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Programa</dt><dd style="text-align:right;font-weight:bold">' + reg.programa + '</dd></div>' +
+        '<div class="fila"><dt style="font-weight:bold;color:#5a6580;flex:0 0 38%">Fecha de culminación</dt><dd style="text-align:right;font-weight:bold">' + fechaBonita(reg.fecha) + '</dd></div>' +
+        '<div class="folio">Folio: ' + folio + '</div>' +
+        '<p class="nota">Este certificado fue emitido por la Academia del Profe Omar y su registro consta en esta página.</p>' +
+      '</div>'
+    );
+  }
+
+  function buscar(folio){
+    if(!datos){
+      pintar('<div class="res nohallado"><div class="titulo">No se pudo cargar el registro</div>' +
+        '<p class="nota">Inténtalo de nuevo en unos segundos. Si el problema continúa, escríbenos por WhatsApp al 240-659-0154.</p></div>');
+      return;
+    }
+    var reg = datos.certificados ? datos.certificados[folio] : null;
+    if(reg){ mostrarEncontrado(folio, reg); }
+    else { mostrarNoHallado(folio); }
+  }
+
+  fetch('certificados.json', {cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('sin registro'); return r.json(); })
+    .then(function(j){ datos = j; })
+    .catch(function(){ datos = null; });
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var folio = (input.value || '').toUpperCase().replace(/\s+/g,'').trim();
+    if(!folio){ mostrarNoHallado('—'); return; }
+    if(datos === null){
+      boton.disabled = true;
+      boton.textContent = 'Cargando registro…';
+      var intentos = 0;
+      var espera = setInterval(function(){
+        intentos++;
+        if(datos !== null || intentos > 20){
+          clearInterval(espera);
+          boton.disabled = false;
+          boton.textContent = 'Verificar certificado';
+          buscar(folio);
+        }
+      }, 150);
+    } else {
+      buscar(folio);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
